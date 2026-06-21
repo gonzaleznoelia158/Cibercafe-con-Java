@@ -30,7 +30,7 @@ public class ProductoDAO {
     
         List<Producto> produ = new ArrayList<>();
         try {
-        String sql = "SELECT * FROM producto";
+        String sql = "SELECT * FROM producto WHERE activo = true";
         Connection conec = Conexion.getConexion();
         PreparedStatement prep = conec.prepareStatement(sql);
         ResultSet res = prep.executeQuery();
@@ -49,6 +49,18 @@ public class ProductoDAO {
         }
         return produ; 
     }
+      
+      public void desactivar(int id) {
+    try {
+        String sql = "UPDATE producto SET activo = false WHERE id = ?";
+        Connection conec = Conexion.getConexion();
+        PreparedStatement prep = conec.prepareStatement(sql);
+        prep.setInt(1, id);
+        prep.executeUpdate();
+    } catch (SQLException e) {
+        System.out.println("No se pudo desactivar el producto: " + e.getMessage());
+    }
+}
       
       public Producto buscarPorId(int id){
         Producto prod = null;

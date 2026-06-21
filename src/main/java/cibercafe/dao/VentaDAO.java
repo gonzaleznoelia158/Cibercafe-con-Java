@@ -11,20 +11,26 @@ import java.util.List;
 
 public class VentaDAO {
     
-    public void insertar(Venta ventas) {
-       try  {
-        String sql = "INSERT INTO venta (id_cliente, fecha, total) VALUES (?, ?, ?)";
-        
+    public int insertar(Venta ventas) {
+    int idGenerado = -1;
+    try {
+        String sql = "INSERT INTO venta (id_cliente, id_sesion, fecha, total) VALUES (?, ?, ?, ?)";
         Connection conec = Conexion.getConexion();
-        PreparedStatement prep = conec.prepareStatement(sql);
+        PreparedStatement prep = conec.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
         prep.setInt(1, ventas.getIdCliente());
-        prep.setTimestamp(2, java.sql.Timestamp.valueOf(ventas.getFecha()));
-        prep.setDouble(3, ventas.getTotal());
-        prep.executeUpdate(); 
-        } catch (SQLException e) {
-           System.out.println("Hubo un error con la venta: " + e.getMessage());
-       }
+        prep.setInt(2, ventas.getIdSesion());
+        prep.setTimestamp(3, java.sql.Timestamp.valueOf(ventas.getFecha()));
+        prep.setDouble(4, ventas.getTotal());
+        prep.executeUpdate();
+        ResultSet rs = prep.getGeneratedKeys();
+        if (rs.next()) {
+            idGenerado = rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        System.out.println("Hubo un error con la venta: " + e.getMessage());
     }
+    return idGenerado;
+}
     
     public List<Venta> obtenerTodos(){
     
@@ -100,6 +106,23 @@ public class VentaDAO {
             System.out.println("No se pudo eliminar la venta: " + e.getMessage());
         }
     }
+    
+    public double obtenerTotalCafeteriaPorSesion(int idSesion) {
+    double total = 0;
+    try {
+        String sql = "SELECT SUM(total) as total FROM venta WHERE id_sesion = ?";
+        Connection conec = Conexion.getConexion();
+        PreparedStatement prep = conec.prepareStatement(sql);
+        prep.setInt(1, idSesion);
+        ResultSet res = prep.executeQuery();
+        if (res.next()) {
+            total = res.getDouble("total");
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al obtener total de cafetería: " + e.getMessage());
+    }
+    return total;
+}
     
 }
 //Parte hecha por Fabri

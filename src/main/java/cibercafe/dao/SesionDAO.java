@@ -11,12 +11,13 @@ import java.util.List;
 
 public class SesionDAO {
     
-        public void insertar(Sesion s) {
+        public int insertar(Sesion s) {
+            int idGenerado = -1;
        try  {
         String sql = "INSERT INTO sesion (id_cliente, id_computadora, hora_inicio, hora_fin, estado, costo_total) VALUES (?, ?, ?, ?, ?, ?)";
         
         Connection conec = Conexion.getConexion();
-        PreparedStatement prep = conec.prepareStatement(sql);
+        PreparedStatement prep = conec.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
         prep.setInt(1, s.getIdCliente());
         prep.setInt(2, s.getIdComputadora());
         prep.setTimestamp(3, java.sql.Timestamp.valueOf(s.getHoraInicio()));
@@ -24,9 +25,14 @@ public class SesionDAO {
         prep.setString(5, s.getEstado());
         prep.setDouble(6, s.getCostoTotal());
         prep.executeUpdate(); 
+        ResultSet rs = prep.getGeneratedKeys();
+        if (rs.next()) {
+        idGenerado = rs.getInt(1);
+       }
         } catch (SQLException e) {
            System.out.println("Hubo un error al insertar los datos de sesion: " + e.getMessage());
        }
+       return idGenerado;
     }
     
     public List<Sesion> obtenerTodos(){
@@ -112,6 +118,62 @@ public class SesionDAO {
             System.out.println("No se pudo eliminar la sesion: " + e.getMessage());
         }
     }
+    
+    public List<Sesion> obtenerActivas() {
+    List<Sesion> ses = new ArrayList<>();
+    try {
+        String sql = "SELECT * FROM sesion WHERE estado = 'activa'";
+        Connection conec = Conexion.getConexion();
+        PreparedStatement prep = conec.prepareStatement(sql);
+        ResultSet res = prep.executeQuery();
+        while (res.next()) {
+            Sesion sess = new Sesion();
+            sess.setId(res.getInt("id"));
+            sess.setIdCliente(res.getInt("id_cliente"));
+            sess.setIdComputadora(res.getInt("id_computadora"));
+            sess.setHoraInicio(res.getTimestamp("hora_inicio").toLocalDateTime());
+            if (res.getTimestamp("hora_fin") != null) {
+            sess.setHoraFin(res.getTimestamp("hora_fin").toLocalDateTime());}
+            sess.setEstado(res.getString("estado"));
+            sess.setCostoTotal(res.getDouble("costo_total"));
+            ses.add(sess);
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al obtener sesiones activas: " + e.getMessage());
+    }
+    return ses;
+}
+    
+    public List<Sesion> obtenerVencidas() {
+    List<Sesion> ses = new ArrayList<>();
+    try {
+        String sql = "SELECT * FROM sesion WHERE estado = 'activa' AND hora_fin < NOW()";
+        Connection conec = Conexion.getConexion();
+        PreparedStatement prep = conec.prepareStatement(sql);
+        ResultSet res = prep.executeQuery();
+        while (res.next()) {
+            Sesion sess = new Sesion();
+            sess.setId(res.getInt("id"));
+            sess.setIdComputadora(res.getInt("id_computadora"));
+            ses.add(sess);
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al obtener sesiones vencidas: " + e.getMessage());
+    }
+    return ses;
+}
+   
+    public void cerrarSesion(int id) {
+    try {
+        String sql = "UPDATE sesion SET estado = 'cerrada' WHERE id = ?";
+        Connection conec = Conexion.getConexion();
+        PreparedStatement prep = conec.prepareStatement(sql);
+        prep.setInt(1, id);
+        prep.executeUpdate();
+    } catch (SQLException e) {
+        System.out.println("Error al cerrar sesión: " + e.getMessage());
+    }
+}
     
 }
 //Parte hecha por Fabri

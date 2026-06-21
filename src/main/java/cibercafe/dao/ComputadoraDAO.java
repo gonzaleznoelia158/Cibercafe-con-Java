@@ -39,6 +39,7 @@ public class ComputadoraDAO {
             com.setId(res.getInt("id"));
             com.setNombre(res.getString("nombre"));
             com.setIdCategoria(res.getInt("id_categoria"));
+            com.setEstado(res.getString("estado"));
             
             compu.add(com);
          }
@@ -48,6 +49,18 @@ public class ComputadoraDAO {
         return compu; 
     }
       
+      public void actualizarEstado(int id, String estado) {
+    try {
+        String sql = "UPDATE computadora SET estado = ? WHERE id = ?";
+        Connection conec = Conexion.getConexion();
+        PreparedStatement prep = conec.prepareStatement(sql);
+        prep.setString(1, estado);
+        prep.setInt(2, id);
+        prep.executeUpdate();
+    } catch (SQLException e) {
+        System.out.println("No se pudo actualizar el estado de la computadora: " + e.getMessage());
+    }
+}
       public Computadora buscarPorId(int id){
         Computadora comput = null;
         try {
@@ -61,6 +74,7 @@ public class ComputadoraDAO {
             comput.setId(res.getInt("id"));
             comput.setNombre(res.getString("nombre"));
             comput.setIdCategoria(res.getInt("id_categoria"));
+            comput.setEstado(res.getString("estado"));
            }  
             
           } catch (SQLException e){

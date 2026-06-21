@@ -6,6 +6,7 @@ public class Venta {
 
     private int id;
     private int idCliente;
+    private int idSesion;
     private LocalDateTime fecha;
     private double total;
 
@@ -26,6 +27,10 @@ public class Venta {
         return idCliente;
     }
     
+    public int getIdSesion() {
+    return idSesion;
+    }
+    
     public LocalDateTime getFecha() {
         return fecha;
     }
@@ -40,6 +45,10 @@ public class Venta {
 
     public void setIdCliente(int idCliente) {
         this.idCliente = idCliente;
+    }
+    
+    public void setIdSesion(int idSesion) {
+    this.idSesion = idSesion;
     }
     
     public void setFecha(LocalDateTime fecha) {

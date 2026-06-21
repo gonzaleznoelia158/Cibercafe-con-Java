@@ -72,6 +72,26 @@ public class UsuarioDAO {
         return us;
     }
     
+    public Usuario buscarPorCredenciales(String nombreUsuario, String contrasenia) {
+        Usuario usuar = null;
+        try {
+            String sql = "SELECT * FROM usuario WHERE nombre_usuario = ? AND contrasenia = ?";
+            Connection conec= Conexion.getConexion();
+            PreparedStatement prep = conec.prepareStatement(sql);
+            prep.setString(1, nombreUsuario);
+            prep.setString(2, contrasenia);
+            ResultSet res = prep.executeQuery();
+            if (res.next()) {
+            usuar = new Usuario();
+            usuar.setNombreUsuario(res.getString("nombre_usuario"));
+            usuar.setContrasenia(res.getString("contrasenia"));
+             }
+            } catch (SQLException e) {
+                    System.out.println("Usuario o contraseña no encontrados/incorrectos" + e.getMessage());
+                    }
+        return usuar;
+    }
+    
     public void actualizar(Usuario usu){
         try{
             String sql = "UPDATE usuario SET nombre_usuario = ?, contrasenia = ?, rol = ? WHERE id = ?";
